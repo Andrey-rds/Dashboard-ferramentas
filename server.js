@@ -13,10 +13,10 @@ const publicPath = path.resolve(__dirname, 'app', 'public');
 
 // JSON recebido do hub (srv-pve) fica no volume persistente do Balena (/data),
 // para sobreviver a restart/atualização do container. Enquanto nenhum JSON
-// chegar, o dashboard usa o app/public/dados_painel.json embutido na imagem.
+// chegar, a tela teste.html usa o app/public/dados_teste.json embutido na imagem.
 const DATA_DIR = process.env.DATA_DIR || '/data';
-const jsonRecebidoPath = path.join(DATA_DIR, 'dados_painel.json');
-const jsonPadraoPath = path.join(publicPath, 'dados_painel.json');
+const jsonRecebidoPath = path.join(DATA_DIR, 'dados_teste.json');
+const jsonPadraoPath = path.join(publicPath, 'dados_teste.json');
 
 // Integração com o hub (variáveis de dispositivo/fleet no balenaCloud)
 const HUB_TOKEN = process.env.HUB_TOKEN;       // valida o POST do hub (header X-Hub-Token)
@@ -156,7 +156,7 @@ app.get('/js/overscan.js', (req, res) => {
 
 // 5. Rota explícita para o JSON (antes do static, para priorizar o JSON recebido)
 
-app.get('/dados_painel.json', (req, res) => {
+app.get('/dados_teste.json', (req, res) => {
 
   const jsonFilePath = fs.existsSync(jsonRecebidoPath) ? jsonRecebidoPath : jsonPadraoPath;
 
@@ -198,7 +198,7 @@ app.use('/js', express.static(path.join(publicPath, 'js')));
 
 app.get('*', (req, res) => {
 
-  res.sendFile(path.join(publicPath, 'index.html'));
+  res.sendFile(path.join(publicPath, 'teste.html'));
 
 });
 
