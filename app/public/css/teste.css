@@ -1,126 +1,53 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+:root {
+  --grafana-bg: #0b0c10;
+  --grafana-card: #14161e;
+  --grafana-card-border: #202430;
+  --grafana-card-header: #1a1d27;
+  --grafana-text-main: #f1f5f9;
+  --grafana-text-muted: #94a3b8;
+  --grafana-yellow: #f59e0b;
+  --grafana-red: #ef4444;
+  --grafana-blue: #3b82f6;
+}
 
-* {
-  box-sizing: border-box;
+html, body {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden !important;
+  background-color: var(--grafana-bg);
+  color: var(--grafana-text-main);
+  font-family: 'Outfit', sans-serif;
   user-select: none;
 }
 
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #080b11;
-  color: #f1f5f9;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  margin: 0;
-  padding: 1rem;
-}
-
-.font-mono-custom {
+.font-mono-num {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Animação do Indicador Online */
-.pulse-glow {
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
-  animation: pulse-ring 2s infinite;
-}
-
-@keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0px rgba(16, 185, 129, 0.7); }
-  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-  100% { box-shadow: 0 0 0 0px rgba(16, 185, 129, 0); }
-}
-
-/* Efeito Glassmorphism dos Cards estilo Grafana */
+/* Clean modern Grafana TV card */
 .grafana-card {
-  background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  background-color: var(--grafana-card);
+  border: 1px solid var(--grafana-card-border);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
-.grafana-card-highlight {
-  border: 1px solid rgba(59, 130, 246, 0.2);
+.grafana-card-header {
+  background-color: var(--grafana-card-header);
+  border-bottom: 1px solid var(--grafana-card-border);
 }
 
-/* Tipografia otimizada para leitura à distância em TV. */
-body {
-  text-transform: uppercase;
+/* Subtle live indicator */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.9); }
 }
 
-header h1 {
-  font-size: 1.45rem !important;
+.pulse-live {
+  animation: pulse-dot 2s ease-in-out infinite;
 }
 
-header p,
-header span,
-header div {
-  letter-spacing: 0.02em;
-}
-
-header p {
-  font-size: 0.9rem !important;
-}
-
-header .text-\[10px\] {
-  font-size: 0.78rem !important;
-}
-
-header .text-sm,
-header .font-bold {
-  font-size: 1.05rem !important;
-}
-
-main > section h2 {
-  font-size: 1.15rem !important;
-}
-
-main > section p {
-  font-size: 0.82rem !important;
-}
-
-main > section .text-\[10px\],
-main > section .text-xs {
-  font-size: 0.9rem !important;
-}
-
-main > section .grid span {
-  font-size: 1rem !important;
-}
-
-main > section .grid span:first-child {
-  font-size: 0.78rem !important;
-}
-
-main > section .border-t span,
-main > section .border-t strong {
-  font-size: 0.82rem !important;
-}
-
-main > section .h-24 {
-  height: 2.5rem !important;
-}
-
-footer {
-  height: 11rem !important;
-}
-
-footer .text-xs,
-footer .text-\[10px\],
-footer .text-\[11px\],
-footer .text-\[9px\] {
-  font-size: 0.98rem !important;
-}
-
-footer .text-slate-500,
-footer .text-slate-400,
-footer .text-slate-300,
-footer .text-slate-200,
-footer .text-emerald-400 {
-  font-size: 0.98rem !important;
-}
-
-footer .h-24 {
-  height: 6.25rem !important;
+.timer-progress-bar {
+  transition: width 0.1s linear;
 }

@@ -1,0 +1,76 @@
+{
+  "cabecalho": {
+    "titulo": "RÁDIO LOCUTOR",
+    "subtitulo": "Monitoramento de Voz, Automação e Processos de Áudio",
+    "visao_inicial": "VISÃO DIÁRIA (24 HORAS)",
+    "noc_status": "NOC LIVE"
+  },
+  "rotacao": {
+    "intervalo_segundos": 30,
+    "visoes": ["diario", "semanal", "mensal"]
+  },
+  "visoes": {
+    "diario": {
+      "viewName": "VISÃO DIÁRIA (24 HORAS)",
+      "badgeText": "ÚLTIMAS 24H",
+      "chartTitle": "ACOMPANHAMENTO DIÁRIO POR HORA (SUCESSO VS PROBLEMAS)",
+      "labels": ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"],
+      "total": "48.920",
+      "sucesso": "47.810",
+      "problema": "1.110",
+      "sucessoRate": "97.7%",
+      "problemaRate": "2.3%",
+      "trendTotal": "+12.4%",
+      "chartSucesso": [4200, 3100, 6800, 8500, 9200, 7800, 5100, 3110],
+      "chartProblema": [90, 45, 120, 280, 310, 150, 80, 35]
+    },
+    "semanal": {
+      "viewName": "VISÃO SEMANAL (DIAS DA SEMANA)",
+      "badgeText": "ÚLTIMOS 7 DIAS",
+      "chartTitle": "ACOMPANHAMENTO SEMANAL POR DIA (SUCESSO VS PROBLEMAS)",
+      "labels": ["SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO", "DOMINGO"],
+      "total": "342.440",
+      "sucesso": "335.120",
+      "problema": "7.320",
+      "sucessoRate": "97.9%",
+      "problemaRate": "2.1%",
+      "trendTotal": "+8.7%",
+      "chartSucesso": [48200, 49100, 51000, 47800, 52300, 43200, 43520],
+      "chartProblema": [1050, 980, 1120, 890, 1240, 1020, 1020]
+    },
+    "mensal": {
+      "viewName": "VISÃO MENSAL ACUMULADA",
+      "badgeText": "VISÃO MENSAL",
+      "chartTitle": "ACOMPANHAMENTO MENSAL POR SEMANAS (SUCESSO VS PROBLEMAS)",
+      "labels": ["SEMANA 1", "SEMANA 2", "SEMANA 3", "SEMANA 4"],
+      "total": "1.420.500",
+      "sucesso": "1.395.000",
+      "problema": "25.500",
+      "sucessoRate": "98.2%",
+      "problemaRate": "1.8%",
+      "trendTotal": "+5.1%",
+      "chartSucesso": [340000, 355000, 348000, 352000],
+      "chartProblema": [7200, 5800, 6100, 6400]
+    }
+  },
+  "processos_radio": [
+    "SINTETIZADOR TTS VOZ #1 (VINHETA)",
+    "GERADOR DE HORA CERTA AUTOMÁTICA",
+    "BOLETIM DE NOTÍCIAS - STREAM ÁUDIO HD",
+    "SINTETIZADOR DE CLIMA E PREVISÃO",
+    "PROCESSAMENTO DE GRADE MUSICAL FM",
+    "SPOT PUBLICITÁRIO #104 (AUDIO FEED)",
+    "TRANSCODIFICADOR AAC/MP3 320KBPS",
+    "INTERVENÇÃO LOCUTOR VIRTUAL AI",
+    "VALIDADOR DE SCRIPT DE LOCUÇÃO",
+    "SINCRONIZAÇÃO ENCARTE DIGITAL"
+  ],
+  "mensagens_erro": [
+    "HTTP 500 - SPEECH ENGINE TIMEOUT",
+    "HTTP 503 - AUDIO STREAM UNAVAILABLE",
+    "HTTP 404 - VINHETA FILE NOT FOUND",
+    "HTTP 408 - AUDIO BUFFER REQUEST TIMEOUT",
+    "HTTP 502 - AI VOICE SERVER ERROR",
+    "HTTP 403 - COMMERCIAL LICENSE EXPIRED"
+  ]
+}

@@ -1,341 +1,639 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="h-full overflow-hidden">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NOC Dashboard - Monitoramento de Serviços</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/teste.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rádio Locutor - Grafana NOC TV Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts for High-Readability TV View -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/teste.css">
+    <!-- Estilos originais separados em css/teste.css
+        :root {
+            --grafana-bg: #0b0c10;
+            --grafana-card: #14161e;
+            --grafana-card-border: #202430;
+            --grafana-card-header: #1a1d27;
+            --grafana-text-main: #f1f5f9;
+            --grafana-text-muted: #94a3b8;
+            --grafana-yellow: #f59e0b;
+            --grafana-red: #ef4444;
+            --grafana-blue: #3b82f6;
+        }
+
+        html, body {
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden !important;
+            background-color: var(--grafana-bg);
+            color: var(--grafana-text-main);
+            font-family: 'Outfit', sans-serif;
+            user-select: none;
+        }
+
+        .font-mono-num {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Clean modern Grafana TV card */
+        .grafana-card {
+            background-color: var(--grafana-card);
+            border: 1px solid var(--grafana-card-border);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grafana-card-header {
+            background-color: var(--grafana-card-header);
+            border-bottom: 1px solid var(--grafana-card-border);
+        }
+
+        /* Subtle live indicator */
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.9); }
+        }
+
+        .pulse-live {
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .timer-progress-bar {
+            transition: width 0.1s linear;
+        }
+    -->
 </head>
-<body class="flex flex-col gap-3">
+<body class="h-screen max-h-screen overflow-hidden flex flex-col justify-between p-3 lg:p-4 antialiased">
 
-  <!-- HEADER NOC -->
-  <header class="grafana-card rounded-xl p-3 flex items-center justify-between shrink-0">
-    <div class="flex items-center gap-4">
-      <div class="flex items-center gap-3 border-r border-slate-800 pr-4">
-        <!-- Logo RDS / InsideTV Embutido -->
-        <svg class="h-8" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="77" cy="106" r="11" fill="#E53935"/>
-          <rect x="134" y="86" width="23" height="52" rx="11.5" fill="#E53935"/>
-          <rect x="221" y="68" width="23" height="97" rx="11.5" fill="#FFB300"/>
-          <rect x="307" y="86" width="23" height="52" rx="11.5" fill="#0277BD"/>
-          <circle cx="403" cy="106" r="11" fill="#0277BD"/>
-        </svg>
-        <div>
-          <h1 id="dashboard-title" class="text-lg font-extrabold tracking-wide text-white uppercase flex items-center gap-2">
-            NOC Operations Center <span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs px-2 py-0.5 rounded font-mono-custom">v2.4</span>
-          </h1>
-          <p id="dashboard-subtitle" class="text-xs text-slate-400 font-medium">Monitoramento contínuo de infraestrutura e ecossistema digital</p>
+    <!-- TV HEADER BAR (CLEAN, LOGO, CLOCK & ACTIVE VIEW) -->
+    <header class="grafana-card p-3 lg:p-4 flex items-center justify-between gap-4 border-l-4 border-l-yellow-500 shrink-0 mb-2">
+        <!-- Title & RDS Radio Branding -->
+        <div class="flex items-center gap-4">
+            <!-- Official RDS Logo SVG (Corrected 'rds' without leading dot) -->
+            <div class="flex items-center bg-black/30 px-3 py-1.5 rounded-lg border border-gray-800">
+                <svg viewBox="0 0 210 70" class="h-9 lg:h-11 w-auto">
+                    <!-- Red dot -->
+                    <circle cx="12" cy="35" r="7" fill="#e52d27" />
+                    <!-- Red bar -->
+                    <rect x="26" y="16" width="12" height="38" rx="6" fill="#e52d27" />
+                    <!-- Yellow bar -->
+                    <rect x="46" y="6" width="12" height="58" rx="6" fill="#fbb03b" />
+                    <!-- Blue bar -->
+                    <rect x="66" y="16" width="12" height="38" rx="6" fill="#005885" />
+                    <!-- Blue dot -->
+                    <circle cx="94" cy="35" r="7" fill="#005885" />
+                    <!-- Text 'rds' without leading dot -->
+                    <text x="108" y="48" fill="#ffffff" font-family="'Outfit', sans-serif" font-weight="800" font-size="44" letter-spacing="-1">rds</text>
+                </svg>
+            </div>
+
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-xl lg:text-3xl font-extrabold tracking-tight text-white uppercase">
+                        RÁDIO LOCUTOR
+                    </h1>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                        <span class="w-2 h-2 rounded-full bg-yellow-400 pulse-live"></span>
+                        NOC LIVE
+                    </span>
+                </div>
+                <p class="text-xs font-semibold text-gray-400 tracking-wide mt-0.5">
+                    Monitoramento de Voz, Automação e Processos de Áudio
+                </p>
+            </div>
         </div>
-      </div>
 
-      <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-glow"></span>
-        <span id="dashboard-status" class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Sistemas Operacionais (100%)</span>
-      </div>
+        <!-- TV Status & Digital Clock -->
+        <div class="flex items-center gap-4 bg-black/40 px-4 py-2 rounded-lg border border-gray-800/80">
+            <!-- Active Screen Badge Indicator -->
+            <div id="tv-view-badge" class="px-3 py-1.5 rounded bg-amber-600/90 text-white font-extrabold text-xs lg:text-sm tracking-wider uppercase flex items-center gap-2">
+                <i class="fa-solid fa-tv text-yellow-300"></i>
+                <span id="tv-view-name">VISÃO DIÁRIA (24 HORAS)</span>
+            </div>
+
+            <!-- Rotation Timer -->
+            <div class="text-right border-l border-gray-800 pl-4 hidden md:block">
+                <div class="text-[10px] uppercase font-bold text-gray-400">Troca em</div>
+                <div id="timer-text" class="text-xs font-mono-num font-extrabold text-yellow-400">
+                    30s
+                </div>
+            </div>
+
+            <!-- NOC DIGITAL CLOCK -->
+            <div class="text-right border-l border-gray-800 pl-4">
+                <div class="text-[10px] uppercase font-bold text-gray-400">Hora Certa</div>
+                <div id="header-clock" class="text-xl lg:text-2xl font-mono-num font-black text-yellow-400 tracking-tight">
+                    14:29:54
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Auto Switcher Progress Bar -->
+    <div class="w-full bg-gray-900/60 h-1 rounded-full mb-2 overflow-hidden shrink-0">
+        <div id="timer-bar" class="bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 h-full w-full timer-progress-bar"></div>
     </div>
 
-    <!-- Metadados em Tempo Real -->
-    <div class="flex items-center gap-6 font-mono-custom text-xs">
-      <div class="text-right">
-        <div class="text-slate-400 text-[10px] uppercase">Taxa de Resposta</div>
-        <div id="response-rate" class="text-emerald-400 font-bold">99.98%</div>
-      </div>
-      <div class="text-right">
-        <div class="text-slate-400 text-[10px] uppercase">Carga Global</div>
-        <div id="global-load" class="text-blue-400 font-bold">14.2 req/s</div>
-      </div>
-      <div class="text-right border-l border-slate-800 pl-6">
-        <div class="text-slate-400 text-[10px] uppercase">Horário Local</div>
-        <div id="live-clock" class="text-slate-100 font-bold text-sm">00:00:00</div>
-      </div>
-    </div>
-  </header>
+    <!-- MAIN DASHBOARD CONTENT (100vh ZERO-SCROLL) -->
+    <main class="flex-1 flex flex-col gap-2.5 min-h-0 overflow-hidden">
 
-  <!-- GRID PRINCIPAL DE SERVIÇOS (5 FERRAMENTAS) -->
-  <main class="grid grid-cols-5 gap-3 flex-1 min-h-0">
-
-    <!-- 1. n8n -->
-    <section class="grafana-card rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
-      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-orange-500"></div>
-      
-      <div>
-        <div class="flex justify-between items-start mb-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-10 h-10 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center p-2">
-              <!-- Logo n8n SVG -->
-              <svg class="w-full h-full" viewBox="0 0 24 24" fill="none">
-                <path d="M18 6C16.34 6 15 7.34 15 9C15 9.4 15.08 9.78 15.23 10.13L10.87 12.63C10.38 12.24 9.77 12 9 12C8.23 12 7.62 12.24 7.13 12.63L2.77 10.13C2.92 9.78 3 9.4 3 9C3 7.34 1.66 6 0 6" stroke="#FF6D5A" stroke-width="2" stroke-linecap="round"/>
-                <circle cx="18" cy="9" r="3" fill="#FF6D5A"/>
-                <circle cx="9" cy="15" r="3" fill="#FF6D5A"/>
-                <circle cx="3" cy="9" r="2" fill="#FF6D5A"/>
-              </svg>
+        <!-- TOP SECTION: 3 CLEAN KPI CARDS -->
+        <section class="grid grid-cols-3 gap-3 shrink-0">
+            
+            <!-- Card 1: Total Execuções -->
+            <div class="grafana-card p-3 lg:p-4 flex flex-col justify-between border-l-4 border-l-blue-500">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs lg:text-sm font-extrabold tracking-wider uppercase text-gray-300 flex items-center gap-2">
+                        <i class="fa-solid fa-server text-blue-400"></i>
+                        Total Execuções
+                    </span>
+                    <span id="badge-period-1" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950/60 text-blue-300 border border-blue-800/40 uppercase">
+                        Últimas 24h
+                    </span>
+                </div>
+                <div class="flex items-baseline justify-between mt-2">
+                    <div id="kpi-total" class="text-3xl lg:text-5xl font-black font-mono-num text-white tracking-tight">
+                        48.920
+                    </div>
+                    <div id="kpi-total-sub" class="text-xs lg:text-sm font-bold text-blue-400">
+                        <i class="fa-solid fa-arrow-trend-up"></i> +12.4%
+                    </div>
+                </div>
+                <div class="w-full bg-gray-900 h-1.5 rounded-full mt-2.5 overflow-hidden">
+                    <div id="kpi-total-bar" class="bg-blue-500 h-full rounded-full" style="width: 100%"></div>
+                </div>
             </div>
-            <div>
-              <h2 class="font-bold text-sm text-white">n8n</h2>
-              <p class="text-[10px] text-slate-400">Workflows & Automations</p>
+
+            <!-- Card 2: Execuções de Sucesso (Código 200 - Yellow Scheme) -->
+            <div class="grafana-card p-3 lg:p-4 flex flex-col justify-between border-l-4 border-l-yellow-500">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs lg:text-sm font-extrabold tracking-wider uppercase text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-yellow-400"></i>
+                        Sucesso (Código 200)
+                    </span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-yellow-950/60 text-yellow-300 border border-yellow-800/40 uppercase">
+                        HTTP 200 OK
+                    </span>
+                </div>
+                <div class="flex items-baseline justify-between mt-2">
+                    <div id="kpi-sucesso" class="text-3xl lg:text-5xl font-black font-mono-num text-yellow-400 tracking-tight">
+                        47.810
+                    </div>
+                    <div id="kpi-sucesso-rate" class="text-sm lg:text-lg font-black font-mono-num text-yellow-400 bg-yellow-950/80 px-2 py-0.5 rounded border border-yellow-800/60">
+                        97.7%
+                    </div>
+                </div>
+                <div class="w-full bg-gray-900 h-1.5 rounded-full mt-2.5 overflow-hidden">
+                    <div id="kpi-sucesso-bar" class="bg-yellow-500 h-full rounded-full" style="width: 97.7%"></div>
+                </div>
             </div>
-          </div>
-          <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2 py-0.5 rounded">ONLINE</span>
-        </div>
 
-        <div class="grid grid-cols-2 gap-2 my-2 font-mono-custom text-xs">
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Latência</span>
-            <span id="ping-n8n" class="text-emerald-400 font-bold">38 ms</span>
-          </div>
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Execuções/m</span>
-            <span class="text-white font-bold">142</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="h-24 w-full">
-        <canvas id="chart-n8n"></canvas>
-      </div>
-
-      <div class="border-t border-slate-800 pt-2 flex justify-between items-center text-[10px] font-mono-custom text-slate-400">
-        <span>Uptime 30d: <strong class="text-slate-200">99.95%</strong></span>
-        <span>HTTP 200</span>
-      </div>
-    </section>
-
-    <!-- 2. ElevenLabs -->
-    <section class="grafana-card rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
-      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-500"></div>
-
-      <div>
-        <div class="flex justify-between items-start mb-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center p-2">
-              <!-- Logo ElevenLabs SVG -->
-              <svg class="w-full h-full" viewBox="0 0 24 24" fill="currentColor" class="text-purple-400">
-                <path d="M7 4H10V20H7V4ZM14 4H17V20H14V4Z"/>
-              </svg>
+            <!-- Card 3: Execuções com Problema (Código != 200) -->
+            <div class="grafana-card p-3 lg:p-4 flex flex-col justify-between border-l-4 border-l-red-500">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs lg:text-sm font-extrabold tracking-wider uppercase text-red-400 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                        Problema (!= 200)
+                    </span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-950/60 text-red-300 border border-red-800/40 uppercase">
+                        HTTP Error
+                    </span>
+                </div>
+                <div class="flex items-baseline justify-between mt-2">
+                    <div id="kpi-problema" class="text-3xl lg:text-5xl font-black font-mono-num text-red-400 tracking-tight">
+                        1.110
+                    </div>
+                    <div id="kpi-problema-rate" class="text-sm lg:text-lg font-black font-mono-num text-red-400 bg-red-950/80 px-2 py-0.5 rounded border border-red-800/60">
+                        2.3%
+                    </div>
+                </div>
+                <div class="w-full bg-gray-900 h-1.5 rounded-full mt-2.5 overflow-hidden">
+                    <div id="kpi-problema-bar" class="bg-red-500 h-full rounded-full" style="width: 2.3%"></div>
+                </div>
             </div>
-            <div>
-              <h2 class="font-bold text-sm text-white">ElevenLabs</h2>
-              <p class="text-[10px] text-slate-400">AI Voice Synthesis</p>
+
+        </section>
+
+        <!-- MIDDLE SECTION: TWO CLEAN COLUMNS FOR LIVE EXECUTION LISTS -->
+        <section class="grid grid-cols-2 gap-3 flex-1 min-h-0 overflow-hidden">
+            
+            <!-- Column 1: Últimas Execuções -->
+            <div class="grafana-card flex flex-col h-full border-t-2 border-t-blue-500 min-h-0 overflow-hidden">
+                <div class="grafana-card-header px-4 py-2 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2 font-extrabold text-xs lg:text-sm uppercase tracking-wider text-white">
+                        <i class="fa-solid fa-list-check text-blue-400"></i>
+                        <span>Últimas Execuções</span>
+                    </div>
+                    <span class="text-[10px] font-mono-num font-bold text-blue-400 flex items-center gap-1.5 bg-blue-950/50 px-2 py-0.5 rounded border border-blue-900">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span> Feed Ao Vivo
+                    </span>
+                </div>
+                <div class="p-2 flex-1 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="text-gray-400 uppercase text-[10px] lg:text-xs font-extrabold border-b border-gray-800">
+                            <tr>
+                                <th class="pb-1.5 px-2">Hora</th>
+                                <th class="pb-1.5 px-2">Processo / Locução</th>
+                                <th class="pb-1.5 px-2 text-center">Status</th>
+                                <th class="pb-1.5 px-2 text-right">Latência</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-ultimas" class="divide-y divide-gray-800/60 font-mono-num text-xs lg:text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-          </div>
-          <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2 py-0.5 rounded">ONLINE</span>
-        </div>
 
-        <div class="grid grid-cols-2 gap-2 my-2 font-mono-custom text-xs">
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Latência</span>
-            <span id="ping-eleven" class="text-emerald-400 font-bold">165 ms</span>
-          </div>
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Quota API</span>
-            <span class="text-purple-400 font-bold">88% Free</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="h-24 w-full">
-        <canvas id="chart-eleven"></canvas>
-      </div>
-
-      <div class="border-t border-slate-800 pt-2 flex justify-between items-center text-[10px] font-mono-custom text-slate-400">
-        <span>Uptime 30d: <strong class="text-slate-200">99.89%</strong></span>
-        <span>TTS Ready</span>
-      </div>
-    </section>
-
-    <!-- 3. Supabase -->
-    <section class="grafana-card rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
-      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-
-      <div>
-        <div class="flex justify-between items-start mb-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-2">
-              <!-- Logo Supabase SVG -->
-              <svg class="w-full h-full" viewBox="0 0 24 24" fill="none">
-                <path d="M13.35 21V13.52H20.67L10.65 3V10.48H3.33L13.35 21Z" fill="#3ECF8E"/>
-              </svg>
+            <!-- Column 2: Execuções com Problema -->
+            <div class="grafana-card flex flex-col h-full border-t-2 border-t-red-500 min-h-0 overflow-hidden">
+                <div class="grafana-card-header px-4 py-2 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2 font-extrabold text-xs lg:text-sm uppercase tracking-wider text-red-400">
+                        <i class="fa-solid fa-bug text-red-400"></i>
+                        <span>Execuções com Problema (Falhas)</span>
+                    </div>
+                    <span class="text-[10px] font-extrabold text-red-300 bg-red-950/50 px-2 py-0.5 rounded border border-red-900 uppercase">
+                        Alertas
+                    </span>
+                </div>
+                <div class="p-2 flex-1 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="text-gray-400 uppercase text-[10px] lg:text-xs font-extrabold border-b border-gray-800">
+                            <tr>
+                                <th class="pb-1.5 px-2">Hora</th>
+                                <th class="pb-1.5 px-2">Processo</th>
+                                <th class="pb-1.5 px-2 text-center">Código</th>
+                                <th class="pb-1.5 px-2">Diagnóstico / Erro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-problemas" class="divide-y divide-gray-800/60 font-mono-num text-xs lg:text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div>
-              <h2 class="font-bold text-sm text-white">Supabase</h2>
-              <p class="text-[10px] text-slate-400">Database & Auth</p>
+
+        </section>
+
+        <!-- LOWER SECTION: TIMELINE TREND CHART -->
+        <section class="grafana-card p-3 flex flex-col border-t-2 border-t-yellow-500 flex-1 min-h-0 overflow-hidden shrink-0">
+            <div class="flex items-center justify-between mb-1 pb-1 border-b border-gray-800 shrink-0">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-chart-column text-yellow-400"></i>
+                    <h2 id="chart-title" class="text-xs lg:text-sm font-extrabold uppercase tracking-wider text-white">
+                        Acompanhamento Diário por Hora (Sucesso vs Problemas)
+                    </h2>
+                </div>
+                <div class="flex items-center gap-4 text-xs font-bold">
+                    <span class="flex items-center gap-1.5 text-yellow-400">
+                        <span class="w-2.5 h-2.5 rounded bg-yellow-500"></span> Sucesso (200)
+                    </span>
+                    <span class="flex items-center gap-1.5 text-red-400">
+                        <span class="w-2.5 h-2.5 rounded bg-red-500"></span> Problema (!= 200)
+                    </span>
+                </div>
             </div>
-          </div>
-          <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2 py-0.5 rounded">ONLINE</span>
-        </div>
 
-        <div class="grid grid-cols-2 gap-2 my-2 font-mono-custom text-xs">
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Latência</span>
-            <span id="ping-supabase" class="text-emerald-400 font-bold">24 ms</span>
-          </div>
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Conexões</span>
-            <span class="text-emerald-400 font-bold">18 / 100</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="h-24 w-full">
-        <canvas id="chart-supabase"></canvas>
-      </div>
-
-      <div class="border-t border-slate-800 pt-2 flex justify-between items-center text-[10px] font-mono-custom text-slate-400">
-        <span>Uptime 30d: <strong class="text-slate-200">100%</strong></span>
-        <span>PostgreSQL</span>
-      </div>
-    </section>
-
-    <!-- 4. InsideTV -->
-    <section class="grafana-card rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
-      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-yellow-500"></div>
-
-      <div>
-        <div class="flex justify-between items-start mb-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center p-1.5">
-              <!-- Logo InsideTV / RDS Icon -->
-              <svg class="w-full h-full" viewBox="0 0 500 200" fill="none">
-                <circle cx="77" cy="106" r="30" fill="#E53935"/>
-                <rect x="134" y="50" width="40" height="110" rx="20" fill="#E53935"/>
-                <rect x="221" y="20" width="40" height="170" rx="20" fill="#FFB300"/>
-                <rect x="307" y="50" width="40" height="110" rx="20" fill="#0277BD"/>
-                <circle cx="403" cy="106" r="30" fill="#0277BD"/>
-              </svg>
+            <!-- Chart Canvas Container -->
+            <div class="w-full flex-1 relative min-h-0">
+                <canvas id="mainChart"></canvas>
             </div>
-            <div>
-              <h2 class="font-bold text-sm text-white">InsideTV</h2>
-              <p class="text-[10px] text-slate-400">Mídia / Player Streaming</p>
-            </div>
-          </div>
-          <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2 py-0.5 rounded">ONLINE</span>
+        </section>
+
+    </main>
+
+    <!-- TV DASHBOARD FOOTER BAR -->
+    <footer class="mt-2 grafana-card px-4 py-1.5 flex items-center justify-between text-xs text-gray-400 font-bold shrink-0">
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-2 text-yellow-400">
+                <i class="fa-solid fa-tower-cell"></i>
+                ESTÚDIO RÁDIO LOCUTOR NOC #01
+            </span>
+            <span class="text-gray-700">|</span>
+            <span class="flex items-center gap-2 text-gray-400">
+                <i class="fa-solid fa-database text-blue-400"></i> MONITORAMENTO EM TEMPO REAL
+            </span>
         </div>
-
-        <div class="grid grid-cols-2 gap-2 my-2 font-mono-custom text-xs">
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Latência</span>
-            <span id="ping-insidetv" class="text-emerald-400 font-bold">62 ms</span>
-          </div>
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Bitrate</span>
-            <span class="text-blue-400 font-bold">12.4 Mbps</span>
-          </div>
+        <div class="flex items-center gap-3 font-mono-num text-[11px]">
+            <span class="px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-300 border border-yellow-500/20 uppercase font-extrabold">
+                SISTEMA NOC TV - TELA ÚNICA
+            </span>
         </div>
-      </div>
+    </footer>
 
-      <div class="h-24 w-full">
-        <canvas id="chart-insidetv"></canvas>
-      </div>
+    <!-- JavaScript original separado em js/teste.js
+        // Dashboard Engine Configuration for TV
+        const viewsOrder = ['diario', 'semanal', 'mensal'];
+        let currentViewIndex = 0;
+        const ROTATION_INTERVAL = 30; // 30 seconds alternation
+        let timerSeconds = ROTATION_INTERVAL;
+        let mainChart = null;
 
-      <div class="border-t border-slate-800 pt-2 flex justify-between items-center text-[10px] font-mono-custom text-slate-400">
-        <span>Uptime 30d: <strong class="text-slate-200">99.92%</strong></span>
-        <span>Stream Active</span>
-      </div>
-    </section>
+        // Radio Process Names
+        const radioProcesses = [
+            'Sintetizador TTS Voz #1 (Vinheta)',
+            'Gerador de Hora Certa Automática',
+            'Boletim de Notícias - Stream Áudio HD',
+            'Sintetizador de Clima e Previsão',
+            'Processamento de Grade Musical FM',
+            'Spot Publicitário #104 (Audio Feed)',
+            'Transcodificador AAC/MP3 320kbps',
+            'Intervenção Locutor Virtual AI',
+            'Validador de Script de Locução',
+            'Sincronização Encarte Digital'
+        ];
 
-    <!-- 5. ChatGPT / OpenAI -->
-    <section class="grafana-card rounded-xl p-3.5 flex flex-col justify-between relative overflow-hidden">
-      <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 to-green-500"></div>
+        const errorMessages = [
+            'HTTP 500 - Speech Engine Timeout',
+            'HTTP 503 - Audio Stream Unavailable',
+            'HTTP 404 - Vinheta File Not Found',
+            'HTTP 408 - Audio Buffer Request Timeout',
+            'HTTP 502 - AI Voice Server Error',
+            'HTTP 403 - Commercial License Expired'
+        ];
 
-      <div>
-        <div class="flex justify-between items-start mb-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center p-2">
-              <!-- Logo OpenAI / ChatGPT SVG -->
-              <svg class="w-full h-full" viewBox="0 0 24 24" fill="currentColor" class="text-teal-400">
-                <path d="M22.28 12.35a6.001 6.001 0 0 0-.31-4.86 6.005 6.005 0 0 0-4.33-3.18 6.002 6.002 0 0 0-5.18 1.48 6.005 6.005 0 0 0-5.83.33 6.003 6.003 0 0 0-2.43 4.29 6 6 0 0 0-1.72 5.09 6.005 6.005 0 0 0 3.2 4.35 6.002 6.002 0 0 0 5.18-1.48 6.006 6.006 0 0 0 5.83-.33 6.002 6.002 0 0 0 2.43-4.29 6 6 0 0 0 1.72-5.09c.35-.44.75-.82 1.22-1.12zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-              </svg>
-            </div>
-            <div>
-              <h2 class="font-bold text-sm text-white">ChatGPT / OpenAI</h2>
-              <p class="text-[10px] text-slate-400">LLM & Processing</p>
-            </div>
-          </div>
-          <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2 py-0.5 rounded">ONLINE</span>
-        </div>
+        // Datasets for Diário (24h), Semanal (7 Dias) e Mensal (4 Semanas)
+        const dataDiario = {
+            viewName: "VISÃO DIÁRIA (24 HORAS)",
+            badgeText: "Últimas 24h",
+            chartTitle: "Acompanhamento Diário por Hora (Sucesso vs Problemas)",
+            labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+            total: '48.920',
+            sucesso: '47.810',
+            problema: '1.110',
+            sucessoRate: '97.7%',
+            problemaRate: '2.3%',
+            trendTotal: '+12.4%',
+            chartSucesso: [4200, 3100, 6800, 8500, 9200, 7800, 5100, 3110],
+            chartProblema: [90, 45, 120, 280, 310, 150, 80, 35]
+        };
 
-        <div class="grid grid-cols-2 gap-2 my-2 font-mono-custom text-xs">
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Latência</span>
-            <span id="ping-chatgpt" class="text-emerald-400 font-bold">210 ms</span>
-          </div>
-          <div class="bg-slate-900/60 p-2 rounded border border-slate-800">
-            <span class="text-[9px] text-slate-500 block uppercase">Modelo</span>
-            <span class="text-teal-400 font-bold">GPT-4o</span>
-          </div>
-        </div>
-      </div>
+        const dataSemanal = {
+            viewName: "VISÃO SEMANAL (DIAS DA SEMANA)",
+            badgeText: "Últimos 7 Dias",
+            chartTitle: "Acompanhamento Semanal por Dia (Sucesso vs Problemas)",
+            labels: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+            total: '342.440',
+            sucesso: '335.120',
+            problema: '7.320',
+            sucessoRate: '97.9%',
+            problemaRate: '2.1%',
+            trendTotal: '+8.7%',
+            chartSucesso: [48200, 49100, 51000, 47800, 52300, 43200, 43520],
+            chartProblema: [1050, 980, 1120, 890, 1240, 1020, 1020]
+        };
 
-      <div class="h-24 w-full">
-        <canvas id="chart-chatgpt"></canvas>
-      </div>
+        const dataMensal = {
+            viewName: "VISÃO MENSAL ACUMULADA",
+            badgeText: "Visão Mensal",
+            chartTitle: "Acompanhamento Mensal por Semanas (Sucesso vs Problemas)",
+            labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+            total: '1.420.500',
+            sucesso: '1.395.000',
+            problema: '25.500',
+            sucessoRate: '98.2%',
+            problemaRate: '1.8%',
+            trendTotal: '+5.1%',
+            chartSucesso: [340000, 355000, 348000, 352000],
+            chartProblema: [7200, 5800, 6100, 6400]
+        };
 
-      <div class="border-t border-slate-800 pt-2 flex justify-between items-center text-[10px] font-mono-custom text-slate-400">
-        <span>Uptime 30d: <strong class="text-slate-200">99.78%</strong></span>
-        <span>v1/models OK</span>
-      </div>
-    </section>
+        const viewsData = {
+            diario: dataDiario,
+            semanal: dataSemanal,
+            mensal: dataMensal
+        };
 
-  </main>
+        function initChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            mainChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dataDiario.labels,
+                    datasets: [
+                        {
+                            label: 'Sucesso (Código 200)',
+                            data: dataDiario.chartSucesso,
+                            backgroundColor: '#f59e0b',
+                            borderColor: '#f59e0b',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Problema (Código != 200)',
+                            data: dataDiario.chartProblema,
+                            backgroundColor: '#ef4444',
+                            borderColor: '#ef4444',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 500,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#16181e',
+                            borderColor: '#202430',
+                            borderWidth: 1,
+                            titleFont: { size: 13, weight: 'bold', family: 'Outfit' },
+                            bodyFont: { size: 12, family: 'JetBrains Mono' },
+                            padding: 8
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: '#1e222d', lineWidth: 1 },
+                            ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold', family: 'Outfit' } }
+                        },
+                        y: {
+                            grid: { color: '#1e222d', lineWidth: 1 },
+                            ticks: { color: '#64748b', font: { size: 10, weight: 'bold', family: 'JetBrains Mono' } }
+                        }
+                    }
+                }
+            });
+        }
 
-  <!-- PAINEL INFERIOR: LOGS E CONSOLIDAÇÃO -->
-  <footer class="grid grid-cols-3 gap-3 h-36 shrink-0">
-    
-    <!-- Chart Geral -->
-    <div class="grafana-card rounded-xl p-3 flex flex-col justify-between col-span-2">
-      <div class="flex justify-between items-center mb-1">
-        <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-          <i class="fa-solid fa-chart-area text-blue-400"></i> Histórico de Responsividade Combinado (ms)
-        </span>
-        <span class="text-[10px] font-mono-custom text-slate-400">Intervalo de atualização: 3s</span>
-      </div>
-      <div class="h-24 w-full">
-        <canvas id="chart-combined"></canvas>
-      </div>
-    </div>
+        function updateDashboardUI(viewKey) {
+            const data = viewsData[viewKey];
 
-    <!-- Feed de Health-Checks Ativos -->
-    <div class="grafana-card rounded-xl p-3 flex flex-col justify-between font-mono-custom">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
-        <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2 font-sans">
-          <i class="fa-solid fa-terminal text-emerald-400"></i> Telemetria de Logs
-        </span>
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-      </div>
+            document.getElementById('tv-view-name').innerText = data.viewName;
+            document.getElementById('badge-period-1').innerText = data.badgeText;
+            document.getElementById('chart-title').innerText = data.chartTitle;
 
-      <div class="text-[11px] space-y-1.5 text-slate-300 my-auto">
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500">[17:56:02]</span>
-          <span class="text-slate-200">n8n /healthz</span>
-          <span class="text-emerald-400">200 OK (38ms)</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500">[17:56:03]</span>
-          <span class="text-slate-200">Supabase DB Ping</span>
-          <span class="text-emerald-400">200 OK (24ms)</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500">[17:56:04]</span>
-          <span class="text-slate-200">ElevenLabs TTS API</span>
-          <span class="text-emerald-400">200 OK (165ms)</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500">[17:56:05]</span>
-          <span class="text-slate-200">ChatGPT v1/models</span>
-          <span class="text-emerald-400">200 OK (210ms)</span>
-        </div>
-      </div>
+            document.getElementById('kpi-total').innerText = data.total;
+            document.getElementById('kpi-total-sub').innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> ${data.trendTotal}`;
+            
+            document.getElementById('kpi-sucesso').innerText = data.sucesso;
+            document.getElementById('kpi-sucesso-rate').innerText = data.sucessoRate;
+            document.getElementById('kpi-sucesso-bar').style.width = data.sucessoRate;
 
-      <div class="text-[9px] text-slate-500 text-right border-t border-slate-800/80 pt-1">
-        Nenhum erro registrado nos últimos 1.440 min
-      </div>
-    </div>
+            document.getElementById('kpi-problema').innerText = data.problema;
+            document.getElementById('kpi-problema-rate').innerText = data.problemaRate;
+            document.getElementById('kpi-problema-bar').style.width = data.problemaRate;
 
-  </footer>
+            if (mainChart) {
+                mainChart.data.labels = data.labels;
+                mainChart.data.datasets[0].data = data.chartSucesso;
+                mainChart.data.datasets[1].data = data.chartProblema;
+                mainChart.update();
+            }
+        }
 
-  <script src="js/teste.js"></script>
+        function startTimerLoop() {
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('header-clock').innerText = now.toLocaleTimeString('pt-BR');
+
+                timerSeconds -= 0.1;
+                if (timerSeconds <= 0) {
+                    timerSeconds = ROTATION_INTERVAL;
+                    currentViewIndex = (currentViewIndex + 1) % viewsOrder.length;
+                    const nextViewKey = viewsOrder[currentViewIndex];
+                    updateDashboardUI(nextViewKey);
+                }
+
+                const percentage = (timerSeconds / ROTATION_INTERVAL) * 100;
+                document.getElementById('timer-bar').style.width = percentage + '%';
+                document.getElementById('timer-text').innerText = `${Math.ceil(timerSeconds)}s`;
+            }, 100);
+        }
+
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateInitialTables() {
+            const tableUltimas = document.getElementById('list-ultimas');
+            const tableProblemas = document.getElementById('list-problemas');
+
+            tableUltimas.innerHTML = '';
+            tableProblemas.innerHTML = '';
+
+            const now = new Date();
+
+            for (let i = 0; i < 5; i++) {
+                const timeStr = new Date(now.getTime() - i * 16000).toLocaleTimeString('pt-BR');
+                const proc = getRandomItem(radioProcesses);
+                const is200 = Math.random() > 0.15;
+                const status = is200 ? '200' : getRandomItem(['500', '503', '404']);
+                const latency = Math.floor(Math.random() * 180 + 30) + 'ms';
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/30 transition border-b border-gray-800/40";
+                row.innerHTML = `
+                    <td class="p-1.5 px-2 text-gray-400 font-medium">${timeStr}</td>
+                    <td class="p-1.5 px-2 font-bold text-gray-200 truncate max-w-[200px]">${proc}</td>
+                    <td class="p-1.5 px-2 text-center">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${is200 ? 'bg-yellow-950/80 text-yellow-400 border border-yellow-800/60' : 'bg-red-950/80 text-red-400 border border-red-800/60'}">
+                            ${status} ${is200 ? 'OK' : 'FAIL'}
+                        </span>
+                    </td>
+                    <td class="p-1.5 px-2 text-right text-gray-300 font-bold">${latency}</td>
+                `;
+                tableUltimas.appendChild(row);
+            }
+
+            for (let i = 0; i < 5; i++) {
+                const timeStr = new Date(now.getTime() - i * 50000).toLocaleTimeString('pt-BR');
+                const proc = getRandomItem(radioProcesses);
+                const err = getRandomItem(errorMessages);
+                const code = err.split(' ')[1];
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-red-950/20 transition border-b border-gray-800/40";
+                row.innerHTML = `
+                    <td class="p-1.5 px-2 text-gray-400 font-medium">${timeStr}</td>
+                    <td class="p-1.5 px-2 font-bold text-gray-200 truncate max-w-[180px]">${proc}</td>
+                    <td class="p-1.5 px-2 text-center">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-red-950/80 text-red-400 border border-red-800/60">
+                            ${code}
+                        </span>
+                    </td>
+                    <td class="p-1.5 px-2 text-red-300 font-bold truncate max-w-[220px]">${err}</td>
+                `;
+                tableProblemas.appendChild(row);
+            }
+        }
+
+        function startLiveStreamSimulation() {
+            setInterval(() => {
+                const tableUltimas = document.getElementById('list-ultimas');
+                const timeStr = new Date().toLocaleTimeString('pt-BR');
+                const proc = getRandomItem(radioProcesses);
+                const is200 = Math.random() > 0.18;
+                const status = is200 ? '200' : getRandomItem(['500', '503', '404']);
+                const latency = Math.floor(Math.random() * 180 + 30) + 'ms';
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-800/30 transition border-b border-gray-800/40 bg-blue-950/20";
+                row.innerHTML = `
+                    <td class="p-1.5 px-2 text-gray-300 font-medium">${timeStr}</td>
+                    <td class="p-1.5 px-2 font-extrabold text-white truncate max-w-[200px]">${proc}</td>
+                    <td class="p-1.5 px-2 text-center">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${is200 ? 'bg-yellow-950/80 text-yellow-400 border border-yellow-800/60' : 'bg-red-950/80 text-red-400 border border-red-800/60'}">
+                            ${status} ${is200 ? 'OK' : 'FAIL'}
+                        </span>
+                    </td>
+                    <td class="p-1.5 px-2 text-right text-gray-200 font-bold">${latency}</td>
+                `;
+
+                tableUltimas.insertBefore(row, tableUltimas.firstChild);
+                if (tableUltimas.children.length > 5) {
+                    tableUltimas.removeChild(tableUltimas.lastChild);
+                }
+
+                if (!is200) {
+                    const tableProblemas = document.getElementById('list-problemas');
+                    const err = getRandomItem(errorMessages);
+                    const code = status;
+
+                    const errRow = document.createElement('tr');
+                    errRow.className = "hover:bg-red-950/30 transition border-b border-gray-800/40 bg-red-950/30";
+                    errRow.innerHTML = `
+                        <td class="p-1.5 px-2 text-gray-300 font-medium">${timeStr}</td>
+                        <td class="p-1.5 px-2 font-extrabold text-white truncate max-w-[180px]">${proc}</td>
+                        <td class="p-1.5 px-2 text-center">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-red-950/80 text-red-400 border border-red-800/60">
+                                ${code}
+                            </span>
+                        </td>
+                        <td class="p-1.5 px-2 text-red-300 font-bold truncate max-w-[220px]">${err}</td>
+                    `;
+
+                    tableProblemas.insertBefore(errRow, tableProblemas.firstChild);
+                    if (tableProblemas.children.length > 5) {
+                        tableProblemas.removeChild(tableProblemas.lastChild);
+                    }
+                }
+            }, 4000);
+        }
+
+        window.onload = function() {
+            initChart();
+            updateDashboardUI('diario');
+            generateInitialTables();
+            startTimerLoop();
+            startLiveStreamSimulation();
+        };
+    -->
+    <script src="js/teste.js"></script>
 </body>
 </html>

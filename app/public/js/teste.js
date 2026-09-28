@@ -1,155 +1,229 @@
-// Relógio em Tempo Real
-function updateClock() {
-  const now = new Date();
-  document.getElementById('live-clock').innerText = now.toLocaleTimeString('pt-BR', {
-    timeZone: 'America/Sao_Paulo'
-  });
-}
-setInterval(updateClock, 1000);
-updateClock();
+const viewsOrder = ['diario', 'semanal', 'mensal'];
+const ROTATION_INTERVAL = 30;
+let currentViewIndex = 0;
+let timerSeconds = ROTATION_INTERVAL;
+let mainChart = null;
+let viewsData = {};
+let radioProcesses = [];
+let errorMessages = [];
 
-// Configuração Genérica dos Mini Gráficos das Ferramentas
-function createSparkline(canvasId, color, baseData) {
-  const ctx = document.getElementById(canvasId).getContext('2d');
-  return new Chart(ctx, {
-    type: 'line',
+async function carregarDados() {
+  const resposta = await fetch('/dados_radio_locutor.json?t=' + Date.now());
+  if (!resposta.ok) throw new Error('Falha ao carregar dados_radio_locutor.json');
+
+  const dados = await resposta.json();
+  viewsData = dados.visoes || {};
+  radioProcesses = dados.processos_radio || [];
+  errorMessages = dados.mensagens_erro || [];
+}
+
+function initChart() {
+  const data = viewsData.diario;
+  const ctx = document.getElementById('mainChart').getContext('2d');
+
+  mainChart = new Chart(ctx, {
+    type: 'bar',
     data: {
-      labels: ['', '', '', '', '', '', '', '', '', ''],
-      datasets: [{
-        data: baseData,
-        borderColor: color,
-        borderWidth: 2,
-        pointRadius: 0,
-        tension: 0.4,
-        fill: true,
-        backgroundColor: (context) => {
-          const bg = context.chart.ctx.createLinearGradient(0, 0, 0, 100);
-          bg.addColorStop(0, color.replace('1)', '0.25)'));
-          bg.addColorStop(1, color.replace('1)', '0)'));
-          return bg;
+      labels: data.labels,
+      datasets: [
+        {
+          label: 'Sucesso (Código 200)',
+          data: data.chartSucesso,
+          backgroundColor: '#f59e0b',
+          borderColor: '#f59e0b',
+          borderWidth: 1,
+          borderRadius: 4
+        },
+        {
+          label: 'Problema (Código != 200)',
+          data: data.chartProblema,
+          backgroundColor: '#ef4444',
+          borderColor: '#ef4444',
+          borderWidth: 1,
+          borderRadius: 4
         }
-      }]
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      scales: { x: { display: false }, y: { display: false, min: 0 } }
+      animation: { duration: 500, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#16181e',
+          borderColor: '#202430',
+          borderWidth: 1,
+          titleFont: { size: 13, weight: 'bold', family: 'Outfit' },
+          bodyFont: { size: 12, family: 'JetBrains Mono' },
+          padding: 8
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#1e222d', lineWidth: 1 },
+          ticks: { color: '#94a3b8', font: { size: 11, weight: 'bold', family: 'Outfit' } }
+        },
+        y: {
+          grid: { color: '#1e222d', lineWidth: 1 },
+          ticks: { color: '#64748b', font: { size: 10, weight: 'bold', family: 'JetBrains Mono' } }
+        }
+      }
     }
   });
 }
 
-// Inicializa Gráficos Individuais
-const chartN8n = createSparkline('chart-n8n', 'rgba(244, 63, 94, 1)', [35, 42, 38, 40, 36, 45, 38, 39, 41, 38]);
-const chartEleven = createSparkline('chart-eleven', 'rgba(168, 85, 247, 1)', [160, 175, 162, 180, 165, 170, 158, 165, 172, 165]);
-const chartSupa = createSparkline('chart-supabase', 'rgba(16, 185, 129, 1)', [22, 25, 24, 28, 23, 22, 26, 24, 23, 24]);
-const chartInside = createSparkline('chart-insidetv', 'rgba(59, 130, 246, 1)', [60, 65, 58, 70, 62, 64, 61, 66, 63, 62]);
-const chartGPT = createSparkline('chart-chatgpt', 'rgba(20, 184, 166, 1)', [200, 220, 205, 230, 215, 210, 225, 208, 212, 210]);
+function updateDashboardUI(viewKey) {
+  const data = viewsData[viewKey];
+  if (!data) return;
 
-// Inicializa Gráfico Combinado Inferior
-const ctxCombined = document.getElementById('chart-combined').getContext('2d');
-const combinedChart = new Chart(ctxCombined, {
-  type: 'line',
-  data: {
-    labels: ['17:50', '17:51', '17:52', '17:53', '17:54', '17:55', '17:56'],
-    datasets: [
-      { label: 'n8n', data: [38, 40, 35, 42, 39, 37, 38], borderColor: '#f43f5e', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-      { label: 'ElevenLabs', data: [165, 170, 160, 175, 168, 162, 165], borderColor: '#a855f7', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-      { label: 'Supabase', data: [24, 26, 22, 25, 23, 24, 24], borderColor: '#10b981', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-      { label: 'InsideTV', data: [62, 64, 60, 68, 63, 61, 62], borderColor: '#3b82f6', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
-      { label: 'ChatGPT', data: [210, 225, 205, 230, 215, 208, 210], borderColor: '#14b8a6', borderWidth: 1.5, pointRadius: 0, tension: 0.3 }
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: true, position: 'right', labels: { color: '#94a3b8', font: { size: 10 } } } },
-    scales: {
-      x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b', font: { size: 9 } } },
-      y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#64748b', font: { size: 9 } } }
-    }
-  }
-});
+  document.getElementById('tv-view-name').innerText = data.viewName;
+  document.getElementById('badge-period-1').innerText = data.badgeText;
+  document.getElementById('chart-title').innerText = data.chartTitle;
+  document.getElementById('kpi-total').innerText = data.total;
+  document.getElementById('kpi-total-sub').innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> ${data.trendTotal}`;
+  document.getElementById('kpi-sucesso').innerText = data.sucesso;
+  document.getElementById('kpi-sucesso-rate').innerText = data.sucessoRate;
+  document.getElementById('kpi-sucesso-bar').style.width = data.sucessoRate;
+  document.getElementById('kpi-problema').innerText = data.problema;
+  document.getElementById('kpi-problema-rate').innerText = data.problemaRate;
+  document.getElementById('kpi-problema-bar').style.width = data.problemaRate;
 
-async function carregarDadosTeste() {
-  try {
-    const resposta = await fetch('/dados_teste.json?t=' + Date.now());
-    if (!resposta.ok) throw new Error('Falha ao carregar dados_teste.json');
-
-    const dados = await resposta.json();
-    const cabecalho = dados.cabecalho || {};
-
-    document.getElementById('dashboard-title').childNodes[0].nodeValue = `${cabecalho.titulo || ''} `;
-    document.getElementById('dashboard-subtitle').textContent = cabecalho.subtitulo || '';
-    document.getElementById('dashboard-status').textContent = cabecalho.status || '';
-    document.getElementById('response-rate').textContent = cabecalho.taxa_resposta || '';
-    document.getElementById('global-load').textContent = cabecalho.carga_global || '';
-
-    const charts = [chartN8n, chartEleven, chartSupa, chartInside, chartGPT];
-    const secoes = document.querySelectorAll('main > section');
-    (dados.servicos || []).forEach((servico, indice) => {
-      const secao = secoes[indice];
-      if (!secao) return;
-
-      const titulo = secao.querySelector('h2');
-      const descricao = secao.querySelector('h2 + p');
-      const status = secao.querySelector('div.flex.justify-between > span');
-      const blocos = secao.querySelectorAll('.grid.grid-cols-2 > div');
-      const rodape = secao.querySelector('.border-t');
-
-      if (titulo) titulo.textContent = servico.nome || '';
-      if (descricao) descricao.textContent = servico.descricao || '';
-      if (status) status.textContent = servico.status || '';
-      if (blocos[0]) blocos[0].querySelector('span:last-child').textContent = `${servico.latencia} ms`;
-      if (blocos[1]) {
-        blocos[1].querySelector('span:first-child').textContent = servico.metrica_nome || '';
-        blocos[1].querySelector('span:last-child').textContent = servico.metrica_valor || '';
-      }
-      if (rodape) {
-        const textosRodape = rodape.querySelectorAll('span');
-        if (textosRodape[0]) textosRodape[0].innerHTML = `Uptime 30d: <strong class="text-slate-200">${servico.uptime || ''}</strong>`;
-        if (textosRodape[1]) textosRodape[1].textContent = servico.rodape || '';
-      }
-
-      if (charts[indice] && Array.isArray(servico.historico)) {
-        charts[indice].data.datasets[0].data = servico.historico;
-        charts[indice].update('none');
-      }
-    });
-
-    if (dados.grafico_combinado && Array.isArray(dados.grafico_combinado.series)) {
-      combinedChart.data.labels = dados.grafico_combinado.labels || [];
-      combinedChart.data.datasets = dados.grafico_combinado.series.map(serie => ({
-        label: serie.label,
-        data: serie.valores,
-        borderColor: serie.cor,
-        borderWidth: 1.5,
-        pointRadius: 0,
-        tension: 0.3
-      }));
-      combinedChart.update('none');
-    }
-  } catch (erro) {
-    console.error('Falha ao consumir dados da tela de teste:', erro);
+  if (mainChart) {
+    mainChart.data.labels = data.labels;
+    mainChart.data.datasets[0].data = data.chartSucesso;
+    mainChart.data.datasets[1].data = data.chartProblema;
+    mainChart.update();
   }
 }
 
-carregarDadosTeste();
+function startTimerLoop() {
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById('header-clock').innerText = now.toLocaleTimeString('pt-BR', {
+      timeZone: 'America/Sao_Paulo'
+    });
 
-// Simulação Dinâmica de Atualizações em Tempo Real (A cada 3 Segundos)
-setInterval(() => {
-  function updateVal(chart, elementId, base, variation) {
-    const newVal = Math.floor(base + (Math.random() * variation * 2 - variation));
-    document.getElementById(elementId).innerText = newVal + ' ms';
-    chart.data.datasets[0].data.shift();
-    chart.data.datasets[0].data.push(newVal);
-    chart.update();
-    return newVal;
+    timerSeconds -= 0.1;
+    if (timerSeconds <= 0) {
+      timerSeconds = ROTATION_INTERVAL;
+      currentViewIndex = (currentViewIndex + 1) % viewsOrder.length;
+      updateDashboardUI(viewsOrder[currentViewIndex]);
+    }
+
+    const percentage = (timerSeconds / ROTATION_INTERVAL) * 100;
+    document.getElementById('timer-bar').style.width = percentage + '%';
+    document.getElementById('timer-text').innerText = `${Math.ceil(timerSeconds)}s`;
+  }, 100);
+}
+
+function getRandomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function generateInitialTables() {
+  const tableUltimas = document.getElementById('list-ultimas');
+  const tableProblemas = document.getElementById('list-problemas');
+  tableUltimas.innerHTML = '';
+  tableProblemas.innerHTML = '';
+
+  const now = new Date();
+
+  for (let i = 0; i < 5; i++) {
+    const timeStr = new Date(now.getTime() - i * 16000).toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const proc = getRandomItem(radioProcesses);
+    const is200 = Math.random() > 0.15;
+    const status = is200 ? '200' : getRandomItem(['500', '503', '404']);
+    const latency = Math.floor(Math.random() * 180 + 30) + 'ms';
+
+    const row = document.createElement('tr');
+    row.className = 'hover:bg-gray-800/30 transition border-b border-gray-800/40';
+    row.innerHTML = `
+      <td class="p-1.5 px-2 text-gray-400 font-medium">${timeStr}</td>
+      <td class="p-1.5 px-2 font-bold text-gray-200 truncate max-w-[200px]">${proc}</td>
+      <td class="p-1.5 px-2 text-center">
+        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${is200 ? 'bg-yellow-950/80 text-yellow-400 border border-yellow-800/60' : 'bg-red-950/80 text-red-400 border border-red-800/60'}">
+          ${status} ${is200 ? 'OK' : 'FAIL'}
+        </span>
+      </td>
+      <td class="p-1.5 px-2 text-right text-gray-300 font-bold">${latency}</td>
+    `;
+    tableUltimas.appendChild(row);
   }
 
-  updateVal(chartN8n, 'ping-n8n', 38, 5);
-  updateVal(chartEleven, 'ping-eleven', 165, 15);
-  updateVal(chartSupa, 'ping-supabase', 24, 3);
-  updateVal(chartInside, 'ping-insidetv', 62, 8);
-  updateVal(chartGPT, 'ping-chatgpt', 210, 20);
-}, 3000);
+  for (let i = 0; i < 5; i++) {
+    const timeStr = new Date(now.getTime() - i * 50000).toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const proc = getRandomItem(radioProcesses);
+    const err = getRandomItem(errorMessages);
+    const code = err.split(' ')[1];
+
+    const row = document.createElement('tr');
+    row.className = 'hover:bg-red-950/20 transition border-b border-gray-800/40';
+    row.innerHTML = `
+      <td class="p-1.5 px-2 text-gray-400 font-medium">${timeStr}</td>
+      <td class="p-1.5 px-2 font-bold text-gray-200 truncate max-w-[180px]">${proc}</td>
+      <td class="p-1.5 px-2 text-center">
+        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-red-950/80 text-red-400 border border-red-800/60">${code}</span>
+      </td>
+      <td class="p-1.5 px-2 text-red-300 font-bold truncate max-w-[220px]">${err}</td>
+    `;
+    tableProblemas.appendChild(row);
+  }
+}
+
+function startLiveStreamSimulation() {
+  setInterval(() => {
+    const tableUltimas = document.getElementById('list-ultimas');
+    const timeStr = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const proc = getRandomItem(radioProcesses);
+    const is200 = Math.random() > 0.18;
+    const status = is200 ? '200' : getRandomItem(['500', '503', '404']);
+    const latency = Math.floor(Math.random() * 180 + 30) + 'ms';
+
+    const row = document.createElement('tr');
+    row.className = 'hover:bg-gray-800/30 transition border-b border-gray-800/40 bg-blue-950/20';
+    row.innerHTML = `
+      <td class="p-1.5 px-2 text-gray-300 font-medium">${timeStr}</td>
+      <td class="p-1.5 px-2 font-extrabold text-white truncate max-w-[200px]">${proc}</td>
+      <td class="p-1.5 px-2 text-center">
+        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${is200 ? 'bg-yellow-950/80 text-yellow-400 border border-yellow-800/60' : 'bg-red-950/80 text-red-400 border border-red-800/60'}">
+          ${status} ${is200 ? 'OK' : 'FAIL'}
+        </span>
+      </td>
+      <td class="p-1.5 px-2 text-right text-gray-200 font-bold">${latency}</td>
+    `;
+
+    tableUltimas.insertBefore(row, tableUltimas.firstChild);
+    if (tableUltimas.children.length > 5) tableUltimas.removeChild(tableUltimas.lastChild);
+
+    if (!is200) {
+      const tableProblemas = document.getElementById('list-problemas');
+      const err = getRandomItem(errorMessages);
+      const errRow = document.createElement('tr');
+      errRow.className = 'hover:bg-red-950/30 transition border-b border-gray-800/40 bg-red-950/30';
+      errRow.innerHTML = `
+        <td class="p-1.5 px-2 text-gray-300 font-medium">${timeStr}</td>
+        <td class="p-1.5 px-2 font-extrabold text-white truncate max-w-[180px]">${proc}</td>
+        <td class="p-1.5 px-2 text-center">
+          <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-red-950/80 text-red-400 border border-red-800/60">${status}</span>
+        </td>
+        <td class="p-1.5 px-2 text-red-300 font-bold truncate max-w-[220px]">${err}</td>
+      `;
+      tableProblemas.insertBefore(errRow, tableProblemas.firstChild);
+      if (tableProblemas.children.length > 5) tableProblemas.removeChild(tableProblemas.lastChild);
+    }
+  }, 4000);
+}
+
+window.addEventListener('load', async () => {
+  try {
+    await carregarDados();
+    initChart();
+    updateDashboardUI('diario');
+    generateInitialTables();
+    startTimerLoop();
+    startLiveStreamSimulation();
+  } catch (erro) {
+    console.error('Falha ao inicializar o dashboard:', erro);
+  }
+});
